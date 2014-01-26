@@ -65,7 +65,7 @@ BUILD_SYSTEM := $(TOPDIR)build/core
 # This is the default target.  It must be the first declared target.
 .PHONY: droid
 DEFAULT_GOAL := droid
-$(DEFAULT_GOAL):
+$(DEFAULT_GOAL): study_image
 
 # Used to force goals to build.  Only use for conditionally defined goals.
 .PHONY: FORCE
