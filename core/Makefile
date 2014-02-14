@@ -8,7 +8,8 @@ ifneq "" "$(filter eng.%,$(BUILD_NUMBER))"
 else
   FILE_NAME_TAG := $(BUILD_NUMBER)
 endif
-
+VERSIONDEF := vendor/jrdcom-version/version.inc
+VERSIONLEN := 12
 is_tests_build := $(filter tests,$(MAKECMDGOALS))
 
 # -----------------------------------------------------------------
@@ -377,6 +378,9 @@ BUILT_RAMDISK_TARGET := $(PRODUCT_OUT)/ramdisk.img
 INSTALLED_RAMDISK_TARGET := $(BUILT_RAMDISK_TARGET)
 $(INSTALLED_RAMDISK_TARGET): $(MKBOOTFS) $(INTERNAL_RAMDISK_FILES) | $(MINIGZIP)
 	$(call pretty,"Target ram disk: $@")
+	if [ -f $(TOPDIR)$(VERSIONDEF) ]; then \
+	awk ' /ANDROID_BOOT_VER/ { print substr($$NF, 2, $(VERSIONLEN)) }' $(TOPDIR)$(VERSIONDEF) >  $(TARGET_ROOT_OUT)/boot.ver ;\
+        fi
 	$(hide) $(MKBOOTFS) $(TARGET_ROOT_OUT) | $(MINIGZIP) > $@
 
 
