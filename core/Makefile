@@ -396,10 +396,6 @@ INTERNAL_BOOTIMAGE_ARGS := \
 INTERNAL_BOOTIMAGE_FILES := $(filter-out --%,$(INTERNAL_BOOTIMAGE_ARGS))
 
 BOARD_KERNEL_CMDLINE := $(strip $(BOARD_KERNEL_CMDLINE))
-#tcl czb@tcl.com add version Number
-BOARD_KERNEL_CMDLINE += \
-androidboot.bootloader=$(shell awk ' /APPSBOOT_VER/ { print substr($$NF, 2,$(VERSIONLEN)) }' $(TOPDIR)$(VERSIONDEF))
-#tcl czb@tcl.com add version Number
 ifdef BOARD_KERNEL_CMDLINE
   INTERNAL_BOOTIMAGE_ARGS += --cmdline "$(BOARD_KERNEL_CMDLINE)"
 endif
