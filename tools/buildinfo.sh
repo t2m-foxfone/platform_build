@@ -15,6 +15,9 @@ echo "ro.build.type=$TARGET_BUILD_TYPE"
 echo "ro.build.user=$USER"
 echo "ro.build.host=`hostname`"
 echo "ro.build.tags=$BUILD_VERSION_TAGS"
+
+source build/tools/t2m_buildinfo.sh
+
 echo "ro.product.model=$PRODUCT_MODEL"
 echo "ro.product.brand=$PRODUCT_BRAND"
 echo "ro.product.name=$PRODUCT_NAME"
