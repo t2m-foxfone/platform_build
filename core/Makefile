@@ -8,9 +8,12 @@ ifneq "" "$(filter eng.%,$(BUILD_NUMBER))"
 else
   FILE_NAME_TAG := $(BUILD_NUMBER)
 endif
+#tcl czb@tcl.com add version Number
+VERSIONDEF := vendor/jrdcom-version/version.inc
+VERSIONLEN := 12
+#tcl czb@tcl.com add version Number
 
 is_tests_build := $(filter tests,$(MAKECMDGOALS))
-
 # -----------------------------------------------------------------
 # Define rules to copy PRODUCT_COPY_FILES defined by the product.
 # PRODUCT_COPY_FILES contains words like <source file>:<dest file>[:<owner>].
@@ -383,6 +386,11 @@ BUILT_RAMDISK_TARGET := $(PRODUCT_OUT)/ramdisk.img
 INSTALLED_RAMDISK_TARGET := $(BUILT_RAMDISK_TARGET)
 $(INSTALLED_RAMDISK_TARGET): $(MKBOOTFS) $(INTERNAL_RAMDISK_FILES) | $(MINIGZIP)
 	$(call pretty,"Target ram disk: $@")
+#tcl czb@tcl.com add version Number
+	if [ -f $(TOPDIR)$(VERSIONDEF) ]; then \
+	awk ' /ANDROID_BOOT_VER/ { print substr($$NF, 2, $(VERSIONLEN)) }' $(TOPDIR)$(VERSIONDEF) >  $(TARGET_ROOT_OUT)/boot.ver ;\
+        fi
+#tcl czb@tcl.com add version Number
 	$(hide) $(MKBOOTFS) $(TARGET_ROOT_OUT) | $(MINIGZIP) > $@
 
 .PHONY: ramdisk-nodeps
@@ -629,6 +637,8 @@ endef
 
 # -----------------------------------------------------------------
 # Recovery image
+#tcl czb@tcl.com add version Number for *#3228#
+RECOVERY_VER:=$(shell awk -F \" '/RECOVERY_VER/ { print $$2 }' $(TOPDIR)$(VERSIONDEF))
 
 # If neither TARGET_NO_KERNEL nor TARGET_NO_RECOVERY are true
 ifeq (,$(filter true, $(TARGET_NO_KERNEL) $(TARGET_NO_RECOVERY)))
@@ -739,8 +749,17 @@ $(INSTALLED_RECOVERYIMAGE_TARGET): $(MKBOOTFS) $(MKBOOTIMG) $(MINIGZIP) $(RECOVE
 	$(hide) cp $(RECOVERY_INSTALL_OTA_KEYS) $(TARGET_RECOVERY_ROOT_OUT)/res/keys
 	$(hide) cat $(INSTALLED_DEFAULT_PROP_TARGET) $(recovery_build_prop) \
 	        > $(TARGET_RECOVERY_ROOT_OUT)/default.prop
+
+	# ajayet overwrite version in recovery root to be used by OTA
+	rm $(TARGET_RECOVERY_ROOT_OUT)/boot.ver
+	# Add Start tcl czb@tcl.com overwrite version in recovery root to be used by OTA
+	echo $(RECOVERY_VER) > $(TARGET_RECOVERY_ROOT_OUT)/recovery.ver
 	$(hide) $(MKBOOTFS) $(TARGET_RECOVERY_ROOT_OUT) | $(MINIGZIP) > $(recovery_ramdisk)
-	$(hide) $(MKBOOTIMG) $(INTERNAL_RECOVERYIMAGE_ARGS) $(BOARD_MKBOOTIMG_ARGS) --output $@
+	@echo "print version $(RECOVERY_VER) in $(TARGET_RECOVERY_ROOT_OUT)"
+        # $(hide) $(MKBOOTIMG) $(INTERNAL_RECOVERYIMAGE_ARGS) $(BOARD_MKBOOTIMG_ARGS) --output $@
+        # $(hide) $(MKBOOTIMG) $(INTERNAL_RECOVERYIMAGE_ARGS) $(if $(RECOVERY_VER),--board $(RECOVERY_VER), --board $(BOARD_MKBOOTIMG_ARGS)) --output $@
+	$(hide) $(MKBOOTIMG) $(INTERNAL_RECOVERYIMAGE_ARGS) $(if $(RECOVERY_VER),--board $(RECOVERY_VER)) $(BOARD_MKBOOTIMG_ARGS) --output $@
+	# Add end tcl czb@tcl.com overwrite version in recovery root to be used by OTA
 	$(hide) $(call assert-max-image-size,$@,$(BOARD_RECOVERYIMAGE_PARTITION_SIZE),raw)
 	@echo ----- Made recovery image: $@ --------
 
@@ -818,6 +837,11 @@ BUILT_SYSTEMIMAGE := $(systemimage_intermediates)/system.img
 
 # $(1): output file
 define build-systemimage-target
+	# tcl _czb@tcl.com add version Number
+	if [ -f $(TOPDIR)$(VERSIONDEF) ]; then \
+        awk ' /ANDROID_SYS_VER/ { print substr($$NF, 2,$(VERSIONLEN)) }' $(TOPDIR)$(VERSIONDEF) >  $(TARGET_OUT)/system.ver ;\
+        fi
+	# tcl czb@tcl.com add version Number
   @echo "Target system fs image: $(1)"
   @mkdir -p $(dir $(1)) $(systemimage_intermediates) && rm -rf $(systemimage_intermediates)/system_image_info.txt
   $(call generate-userimage-prop-dictionary, $(systemimage_intermediates)/system_image_info.txt, skip_fsck=true)
@@ -992,7 +1016,12 @@ define build-userdataimage-target
   $(call pretty,"Target userdata fs image: $(INSTALLED_USERDATAIMAGE_TARGET)")
   @mkdir -p $(TARGET_OUT_DATA)
   @mkdir -p $(userdataimage_intermediates) && rm -rf $(userdataimage_intermediates)/userdata_image_info.txt
-  $(call generate-userimage-prop-dictionary, $(userdataimage_intermediates)/userdata_image_info.txt, skip_fsck=true)
+	#tcl czb@tcl.com add version Number
+	if [ -f $(TOPDIR)$(VERSIONDEF) ]; then \
+        awk ' /ANDROID_USR_VER/ { print substr($$NF, 2,$(VERSIONLEN)) }' $(TOPDIR)$(VERSIONDEF) > $(TARGET_OUT_DATA)/userdata.ver ; \
+        fi
+	#tcl czb@tcl.com add version Number end
+ $(call generate-userimage-prop-dictionary, $(userdataimage_intermediates)/userdata_image_info.txt, skip_fsck=true)
   $(hide) PATH=$(foreach p,$(INTERNAL_USERIMAGES_BINARY_PATHS),$(p):)$$PATH \
       ./build/tools/releasetools/build_image.py \
       $(TARGET_OUT_DATA) $(userdataimage_intermediates)/userdata_image_info.txt $(INSTALLED_USERDATAIMAGE_TARGET)
