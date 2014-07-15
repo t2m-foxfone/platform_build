@@ -18,7 +18,7 @@ echo "ro.build.tags=$BUILD_VERSION_TAGS"
 
 source build/tools/t2m_buildinfo.sh
 
-echo "ro.product.model=$PRODUCT_MODEL"
+echo "ro.product.model=Flame"
 echo "ro.product.brand=$PRODUCT_BRAND"
 echo "ro.product.name=$PRODUCT_NAME"
 echo "ro.product.device=$TARGET_DEVICE"
