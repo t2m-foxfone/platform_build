@@ -87,6 +87,7 @@ PRODUCT_PACKAGES += \
     ndc \
     netcfg \
     netd \
+    nfcd \
     ping \
     ping6 \
     platform.xml \
