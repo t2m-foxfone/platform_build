@@ -21,7 +21,7 @@ source build/tools/t2m_buildinfo.sh
 echo "ro.product.model=Flame"
 echo "ro.product.brand=$PRODUCT_BRAND"
 echo "ro.product.name=$PRODUCT_NAME"
-echo "ro.product.device=flame-kk"
+echo "ro.product.device=flame"
 echo "ro.product.board=$TARGET_BOOTLOADER_BOARD_NAME"
 echo "ro.product.cpu.abi=$TARGET_CPU_ABI"
 if [ -n "$TARGET_CPU_ABI2" ] ; then
